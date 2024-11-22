@@ -30,6 +30,3 @@ sed -i 's/^PermitRootLogin yes/PermitRootLogin no/' "$SSHD_CONFIG" || echo "Perm
 echo "AllowUsers $NAME" >> "$SSHD_CONFIG"
 
 service restart ssh
-
-# Setup knockd on server
-./start-knock.sh
