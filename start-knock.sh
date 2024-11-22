@@ -1,5 +1,21 @@
 #!/bin/bash
 
+set -e
+
+#Check if the script is run as root
+if [ "$EUID" -ne 0 ]; then
+	echo "Please run as root"
+	exit
+fi
+
+# Install knockd if it's not already installed
+if ! command -v knockd &> /dev/null; then
+	echo "Installing knockd..."
+	apt install knockd -y
+else
+	echo "Knockd is already installed."
+fi
+
 # Get the default network interface
 eth_intf=$(ip route | grep default | awk '{print $5}')
 
