@@ -26,10 +26,10 @@ fi
 read -p "Do you want to set up a new user and 'sshd_config'? (y/n) " sshdu
 sshdu=${sshdu:-n}  # Default to 'n' if no input is given
 
-read -p "Do you want to set up swap on 2G? (y/n, default: y) " swapu
+read -p "Do you want to set up swap on 2G? (y/n) " swapu
 swapu=${swapu:-n} 
 
-read -p "Do you want to set knockd on server? (y/n, default: y) " knockdu
+read -p "Do you want to set knockd on server? (y/n) " knockdu
 knockdu=${knockdu:-n}
 
 
