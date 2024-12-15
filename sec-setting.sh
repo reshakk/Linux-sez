@@ -11,15 +11,15 @@ fi
 SSHD_CONFIG="/etc/ssh/sshd_config"
 
 validate_port() {
-	if ! [[ "$1" ~= ^[0-9]+$ ]] || [[ "$1" -le 1024 ]] || [[ "$1" -ge 65535 ]]; then
-		echo "Invalid port number. Please enter a number between 1025 and 65535."
+	if ! [[ "$1" =~ ^[0-9]+$ ]] || [ "$1" -le 1024 ] || [ "$1" -ge 65535 ]; then
+    		echo "Invalid port number. Please enter a number between 1025 and 65535."
 		exit 1
 	fi
 }
 
 validate_name() {
-	if ! [[ $1 ~= ^[a-zA-Z_][a-zA-Z0-9_]*$ ]]; then
-		echo "Invalid username. Usernames must start with a letter or underscore and can only contain letters, numbers, and underscores."
+    if ! [[ "$1" =~ ^[a-zA-Z_][a-zA-Z0-9_]*$ ]]; then
+    		echo "Invalid username. Usernames must start with a letter or underscore and can only contain letters, numbers, and underscores."
 		exit 1
 	fi
 }
