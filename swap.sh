@@ -1,8 +1,8 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 #swapon --show 
 
-set -e
+set -euo pipefail
 
 #Check if the script is run as root
 if [ "$EUID" -ne 0 ]; then

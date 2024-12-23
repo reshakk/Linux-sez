@@ -10,15 +10,22 @@
 #  ░░   ░    ░   ░  ░  ░   ░  ░░ ░  ░   ▒   ░ ░░ ░ ░ ░░ ░ 
 #   ░        ░  ░      ░   ░  ░  ░      ░  ░░  ░   ░  ░   
 
-set -e
 
-echo "Welcome to Reshakk's Ubuntu-server auto installer script!"
+# Define color codes
+
+ERROR='\033[0;31m'
+READ='\033[0;32m'
+OUTPUT='\033[0;33m'
+NOTE='\033[0;34m'
+RESET='\033[0;39m'
+
+echo -e "$NOTE Welcome to Reshakk's Ubuntu-server auto installer script! $RESET"
 echo
 
 
 #Check if the script is run as root
 if [ "$EUID" -ne 0 ]; then
-        echo "Please run as root"
+        echo -e "$ERROR Please run as root $RESET"
         exit
 fi
 
@@ -37,7 +44,7 @@ knockdu=${knockdu:-n}
 execute_script() {
     local script_url=$1
     if ! bash <(curl -sL "$script_url"); then
-        echo "Failed to execute script: $script_url"
+        echo "$ERROR Failed to execute script: $script_url $RESET"
     fi
 }
 

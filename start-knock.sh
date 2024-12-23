@@ -1,6 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-set -e
+set -euo pipefail
 
 #Check if the script is run as root
 if [ "$EUID" -ne 0 ]; then
@@ -19,7 +19,7 @@ fi
 # Get the default network interface
 eth_intf=$(ip route | grep default | awk '{print $5}')
 
-read -p "Enter ssh-port: " port
+read -p "Enter port: " port
 read -p "Enter ports for port-knocking(e.g: 7000,8000,9000): " port_knock
 
 # Write to /etc/knockd.conf
