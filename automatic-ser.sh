@@ -10,8 +10,6 @@
 #  ░░   ░    ░   ░  ░  ░   ░  ░░ ░  ░   ▒   ░ ░░ ░ ░ ░░ ░ 
 #   ░        ░  ░      ░   ░  ░  ░      ░  ░░  ░   ░  ░   
 
-set -e
-
 echo "Welcome to Reshakk's Ubuntu-server auto installer script!"
 echo
 
