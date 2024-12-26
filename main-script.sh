@@ -258,16 +258,11 @@ function knockd_menu() {
 				;;
 			2)
 				new_port=$(whiptail --inputbox "Enter new port for port-knocking (e.g: 7000,8000,9000)" $HEIGHT $WIDTH 3>&1 1>&2 2>&3)
-				if [[ "$new_port" ~= ^[0-9]+$  ]]; then
-					sed -i "s/sequence = .*/sequence = $new_port/" /etc/knockd.conf
-					if systemctl restart knockd.service; then
-						whiptail message_box "Successfully" "Port changed successfully to '$new_port' "
-					else
-						whiptail message_box "Failed" "Failed to restart knockd"
-					fi
+				sed -i "s/sequence = .*/sequence = $new_port/" /etc/knockd.conf
+				if systemctl restart knockd.service; then
+					whiptail message_box "Successfully" "Port changed successfully to '$new_port' "
 				else
-					message_box "Invalid" "Invalid port number"
-					continue
+					whiptail message_box "Failed" "Failed to restart knockd"
 				fi
 				;;
 			3)	
@@ -303,7 +298,7 @@ function ssh_menu() {
 			1)
 				new_port=$(whiptail --inputbox "Enter new ssh-port" $HEIGHT $WIDTH 3>&1 1>&2 2>&3)
 				#read -p "Enter new port(It's better to choose after 1024): " PORT 
-				if ! [[ "$1" ~= ^[0-9]+$ ]] || [[ "$1" -le 1024 ]] || [[ "$1" -ge 65535 ]]; then
+				if ! [[ "$new_port" =~ ^[0-9]+$ ]] || [[ "$new_port" -le 1024 ]] || [[ "$new_port" -ge 65535 ]]; then
 					echo "Invalid port number. Please enter a number between 1025 and 65535."
 					continue
 				fi
@@ -503,7 +498,7 @@ function install_packages() {
   fi
 }
 
-install_package
+install_packages
 
 function message_box {
   local title=$1
