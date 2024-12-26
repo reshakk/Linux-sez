@@ -139,40 +139,40 @@ function view_user_menu() {
             1)
                 new_password=$(whiptail --passwordbox "Enter new password for $username:" $HEIGHT $WIDTH 3>&1 1>&2 2>&3)
                 echo "$username:$new_password" | chpasswd
-                whiptail message_box "Successfully" "Password changed successfully!"
+                message_box "Successfully" "Password changed successfully!"
                 ;;
             2)
                 new_name=$(whiptail --inputbox "Enter new name for $username:" $HEIGHT $WIDTH 3>&1 1>&2 2>&3)
                 usermod -l "$new_name" "$username"
-                whiptail message_box "Successfully" "Name changed successfully to '$new_name' !"
+                message_box "Successfully" "Name changed successfully to '$new_name' !"
                 ;;
             3)
 		current_uid=$(awk -F: -v user="$username" '$1 == user {print $3}' /etc/passwd)
 		message_box "Current UID:" " '$current_uid' "
                 new_uid=$(whiptail --inputbox "Enter new UID for $username:" $HEIGHT $WIDTH 3>&1 1>&2 2>&3)
                 usermod -u "$new_uid" "$username"
-                whiptail message_box "Successfully" "UID changed successfully to 'new_uid' !"
+                message_box "Successfully" "UID changed successfully to '$new_uid' !"
                 ;;
             4)
 		current_guid=$(awk -F: -v user="$username" '$1 == user {print $4}' /etc/passwd)
 		message_box "Current GUID:" " '$current_guid' "
                 new_gid=$(whiptail --inputbox "Enter new GID for $username:" $HEIGHT $WIDTH 3>&1 1>&2 2>&3)
                 usermod -g "$new_gid" "$username"
-                whiptail message_box "Successfully" "GID changed successfully to 'new_gid' !"
+                message_box "Successfully" "GID changed successfully to '$new_gid' !"
                 ;;
             5)
 		current_groups=$(groups $username)
                 message_box "Current Groups:" " $current_groups "
 		new_groups=$(whiptail --inputbox "Enter new groups for $username (comma-separated):" $HEIGHT $WIDTH 3>&1 1>&2 2>&3)
                 usermod -G "$new_groups" "$username"
-                whiptail message_box "Successfully" "New group added successfully!"
+                message_box "Successfully" "New group added successfully!"
                 ;;
             6)
 		current_shell=$(awk -F: -v user="$username" '$1 == user {print $7}' /etc/passwd)
-		message_box "Current Shell:" " '$current_shell' "
+		message_box "Current Shell:" " $current_shell "
                 new_shell=$(whiptail --inputbox "Enter new shell for $username:" $HEIGHT $WIDTH 3>&1 1>&2 2>&3)
                 usermod -s "$new_shell" "$username"
-                whiptail message_box "Successfully" "Shell changed successfully to '$new_shell' !"
+                message_box "Successfully" "Shell changed successfully to '$new_shell' !"
                 ;;
 	    7)
 		current_directory=$(awk -F: -v user="$username" '$1 == user {print $6}' /etc/passwd)
@@ -181,7 +181,7 @@ function view_user_menu() {
                 usermod -d "$new_directory" "$username"
 		mv "$current_directory/*" "$new_directory"
 		#rm -rf "$current_directory"
-                whiptail message_box "Successfully" "Home directory changed successfully to '$new_directory' !"
+                message_box "Successfully" "Home directory changed successfully to '$new_directory' !"
                 ;;
 	    8)
                 break
@@ -200,7 +200,7 @@ function list_users_menu() {
 
   # Check if options are empty
   if [[ -z "$options" ]]; then
-    whiptail message_box "Error" "No User Found."
+    message_box "Error" "No User Found."
     return
   fi
 
@@ -260,9 +260,9 @@ function knockd_menu() {
 				new_port=$(whiptail --inputbox "Enter new port for port-knocking (e.g: 7000,8000,9000)" $HEIGHT $WIDTH 3>&1 1>&2 2>&3)
 				sed -i "s/sequence = .*/sequence = $new_port/" /etc/knockd.conf
 				if systemctl restart knockd.service; then
-					whiptail message_box "Successfully" "Port changed successfully to '$new_port' "
+					message_box "Successfully" "Port changed successfully to '$new_port' "
 				else
-					whiptail message_box "Failed" "Failed to restart knockd"
+					message_box "Failed" "Failed to restart knockd"
 				fi
 				;;
 			3)	
@@ -312,7 +312,7 @@ function ssh_menu() {
 				fi
 				systemctl restart ssh.service
 
-				whiptail message_box "Successfully" "Successfuly change port to '$new_port' "
+				message_box "Successfully" "Successfuly change port to '$new_port' "
 				;;
 			2)
 				username=$(whiptail --inputbox "Enter username to allow ssh-connection" $HEIGHT $WIDTH 3>&1 1>&2 2>&3)
@@ -320,7 +320,7 @@ function ssh_menu() {
 				echo "AllowUsers $username" >> "$SSHD_CONFIG"
 				systemctl restart ssh.service
 				
-				whiptail message_box "Successfully" "Allow '$username' ssh-connection "
+				message_box "Successfully" "Allow '$username' ssh-connection "
 				;;
 			3)
 				break
@@ -343,16 +343,16 @@ function docker_menu() {
 		case $options in
 			1)
 				bash <(curl -sL "https://raw.githubusercontent.com/reshakk/Server-auto/master/script/docker-in.sh")
-				whiptail message_box "Successfully" "Docker is installed."
+				message_box "Successfully" "Docker is installed."
 				;;
 			2)
 				generate_flatnotes
-				whiptail message_box "Successfully" "Generation docker.yml is successfully. "
+				message_box "Successfully" "Generation docker.yml is successfully. "
 				;;
 			3)
 				mkdir /root/Passky
 				wget -P /root/Passky https://github.com/Rabbit-Company/Passky-Server/blob/main/docker-compose.yml
-				whiptail message_box "Successfully" "Generation docker.yml is successfully. "
+				message_box "Successfully" "Generation docker.yml is successfully. "
 				;;
 			4)
 				break
@@ -410,7 +410,7 @@ function nextcloud_menu() {
 		case $options in
 			1)
 				install_nextcloud
-				whiptail message_box "Successfully" "Nextcloud successfully installed with snap . "
+				message_box "Successfully" "Nextcloud successfully installed with snap . "
 				;;
 			2)
 				HTTP_PORT=$(whiptail --inputbox "Enter new HTTP-Port:" $HEIGHT $WIDTH 3>&1 1>&2 2>3)
@@ -431,7 +431,7 @@ function nextcloud_menu() {
 				sudo -u www-data php /var/www/nextcloud/occ user:resetpassword "$username" <<< "$NEW_PASSWORD"
 				snap restart nextcloud
 
-				whiptail message_box "Successfully" "The password has been changed for the $username "
+				message_box "Successfully" "The password has been changed for the $username "
 				;;
 			4)
 				current_domains=$(nextcloud.occ config:system:get trusted_domains)
@@ -474,9 +474,9 @@ function install_nextcloud() {
 		snap set nextcloud ports.http="$HTTP_PORT" ports.https="$HTTPS_PORT"
 		snap restart nextcloud
 
-		whiptail message_box "Successfully" "Change https/http to $HTTPS_PORT $HTTP_PORT ."
+		message_box "Successfully" "Change https/http to $HTTPS_PORT $HTTP_PORT ."
 	else
-		whiptail message_box "Default" "Keeping default ports (HTTP: 80, HTTPS: 443)."
+		message_box "Default" "Keeping default ports (HTTP: 80, HTTPS: 443)."
 	fi
 }
 
@@ -498,7 +498,7 @@ function install_packages() {
   fi
 }
 
-install_packages
+#install_packages
 
 function message_box {
   local title=$1
