@@ -8,3 +8,7 @@ bash <(curl -sL https://raw.githubusercontent.com/reshakk/Server-auto/master/mai
 ```
 
 ![image](https://github.com/reshakk/Server-auto/blob/main/GUI.png)
+
+## Roadmap:
+- [ ] Add fail2ban
+- [ ] Add marzban
