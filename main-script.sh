@@ -481,16 +481,16 @@ function install_nextcloud() {
 }
 
 function install_packages() {
-  if ! which wget whiptail curl zip unzip snap >/dev/null 2>&1; then
+  if ! which wget whiptail curl zip unzip snapd >/dev/null 2>&1; then
     if which apt >/dev/null 2>&1; then
       apt update
-      DEBIAN_FRONTEND=noninteractive apt install wget whiptail curl zip unzip snap  -y
+      DEBIAN_FRONTEND=noninteractive apt install wget whiptail curl zip unzip snapd  -y
       return 0
     fi
     if which yum >/dev/null 2>&1; then
       yum makecache
       yum install epel-release -y || true
-      yum install wget whiptail curl zip unzip snap  -y
+      yum install wget whiptail curl zip unzip snapd  -y
       return 0
     fi
     echo "OS is not supported!"
