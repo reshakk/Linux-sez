@@ -10,6 +10,6 @@ fi
 
 swapoff -a
 
-sed -i 's,\(/.*[[:space:]]none[[:space:]]*swap[[:space:]]\),#\1,' /etc/fstab
+sed -i '/#.*\/swap.img/s/^#//' /etc/fstab
 
 echo "Swap disabled"
