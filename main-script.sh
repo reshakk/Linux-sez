@@ -121,17 +121,18 @@ function view_user_menu() {
             	"5" "Change Groups" \
             	"6" "Change Shell" \
 	    	"7" "Change Home Directory" \
-            	"8" "Exit" 3>&1 1>&2 2>&3)
+		"8" "Delete User" \
+            	"9" "Exit" 3>&1 1>&2 2>&3)
 		if [[ $? -ne 0 ]]; then
 			break
 		fi
 		case $user_config in
-			1)
+		1)
                 	new_password=$(whiptail --passwordbox "Enter new password for $username:" $HEIGHT $WIDTH 3>&1 1>&2 2>&3)
                 	echo "$username:$new_password" | chpasswd
                 	message_box "Successfully" "Password changed successfully!"
                 	;;
-			2)
+		2)
                 	new_name=$(whiptail --inputbox "Enter new name for $username:" $HEIGHT $WIDTH 3>&1 1>&2 2>&3)
                 	usermod -l "$new_name" "$username"
 			mkdir /home/$new_name
@@ -139,35 +140,35 @@ function view_user_menu() {
 			usermod -d /home/$new_name "$new_name"
                 	message_box "Successfully" "Name changed successfully to '$new_name' !"
                 	;;
-            		3)
+            	3)
 			current_uid=$(awk -F: -v user="$username" '$1 == user {print $3}' /etc/passwd)
 			message_box "Current UID:" " '$current_uid' "
                 	new_uid=$(whiptail --inputbox "Enter new UID for $username:" $HEIGHT $WIDTH 3>&1 1>&2 2>&3)
                 	usermod -u "$new_uid" "$username"
                 	message_box "Successfully" "UID changed successfully to '$new_uid' !"
                 	;;
-            		4)
+            	4)
 			current_guid=$(awk -F: -v user="$username" '$1 == user {print $4}' /etc/passwd)
 			message_box "Current GUID:" " '$current_guid' "
                 	new_gid=$(whiptail --inputbox "Enter new GID for $username:" $HEIGHT $WIDTH 3>&1 1>&2 2>&3)
                 	usermod -g "$new_gid" "$username"
                 	message_box "Successfully" "GID changed successfully to '$new_gid' !"
                 	;;
-            		5)
+            	5)
 			current_groups=$(groups $username)
                 	message_box "Current Groups:" " $current_groups "
 			new_groups=$(whiptail --inputbox "Enter new groups for $username (comma-separated):" $HEIGHT $WIDTH 3>&1 1>&2 2>&3)
                 	usermod -G "$new_groups" "$username"
                 	message_box "Successfully" "New group added successfully!"
                 	;;
-            		6)
+            	6)
 			current_shell=$(awk -F: -v user="$username" '$1 == user {print $7}' /etc/passwd)
 			message_box "Current Shell:" " $current_shell "
                 	new_shell=$(whiptail --inputbox "Enter new shell for $username:" $HEIGHT $WIDTH 3>&1 1>&2 2>&3)
                 	usermod -s "$new_shell" "$username"
                 	message_box "Successfully" "Shell changed successfully to '$new_shell' !"
                 	;;
-	    		7)
+	    	7)
 			current_directory=$(awk -F: -v user="$username" '$1 == user {print $6}' /etc/passwd)
 			message_box "Current Home Directory:" " '$current_directory' "
                 	new_directory=$(whiptail --inputbox "Enter new home directory for $username:" $HEIGHT $WIDTH 3>&1 1>&2 2>&3)
@@ -176,7 +177,16 @@ function view_user_menu() {
 			#rm -rf "$current_directory"
                 	message_box "Successfully" "Home directory changed successfully to '$new_directory' !"
                 	;;
-	    		8)break;;
+		8)
+			if whiptail --title "Delete" --yesno "Do you want to delete $username ?" $HEIGHT $WIDTH; then
+				userdel -r "$username"
+				message_box "Successfully" " '$username' successfuly delete!"
+			else
+				break
+			fi
+			;;
+
+		9)break;;
 		esac
 	done
 }
@@ -218,9 +228,18 @@ function swap_menu() {
     			break
   		fi
 		case $options in
-			1) bash <(curl -sL "https://raw.githubusercontent.com/reshakk/Server-auto/master/script/swap.sh");;
-			2) bash <(curl -sL "https://raw.githubusercontent.com/reshakk/Server-auto/master/script/start-swap.sh");;
-			3) bash <(curl -sL "https://raw.githubusercontent.com/reshakk/Server-auto/master/script/stop-swap.sh");;
+			1) 
+				bash <(curl -sL "https://raw.githubusercontent.com/reshakk/Server-auto/master/script/swap.sh")
+				message_box "Successfully" "Swap successfully installed on your system."
+				;;
+			2) 
+				bash <(curl -sL "https://raw.githubusercontent.com/reshakk/Server-auto/master/script/start-swap.sh")
+				message_box "Successfully" "Swap successfully enable."
+				;;
+			3) 
+				bash <(curl -sL "https://raw.githubusercontent.com/reshakk/Server-auto/master/script/stop-swap.sh")	
+				message_box "Successfully" "Swap successfully stoped."
+				;;
 			4) break;;
 		esac
 	done
@@ -402,7 +421,7 @@ function nextcloud_menu() {
 		case $options in
 			1)
 				install_nextcloud
-				message_box "Successfully" "Nextcloud successfully installed with snap . "
+				message_box "Successfully" "Nextcloud successfully installed with snap. "
 				;;
 			2)
 				HTTP_PORT=$(whiptail --inputbox "Enter new HTTP-Port:" $HEIGHT $WIDTH 3>&1 1>&2 2>3)
@@ -456,7 +475,7 @@ function install_nextcloud() {
 	nextcloud.occ config:system:set trusted_domains 1 --value="$trusted_domains"
 	nextcloud.enable-https self-signed
 
-	if whiptail --title "Nextcloud Ports" --yesno "Do you wants to change HTTP/HTTPS ports?." $HEIGHT $WIDTH; then
+	if whiptail --title "Nextcloud Ports" --yesno "Do you wants to change HTTP/HTTPS ports?" $HEIGHT $WIDTH; then
 		HTTP_PORT=$(whiptail --inputbox "Enter new HTTP-Port:" $HEIGHT $WIDTH 3>&1 1>&2 2>3)
 		HTTPS_PORT=$(whiptail --inputbox "Enter new HTTPS-Port:" $HEIGHT $WIDTH 3>&1 1>&2 2>3)
 
@@ -469,6 +488,7 @@ function install_nextcloud() {
 		message_box "Successfully" "Change https/http to $HTTPS_PORT $HTTP_PORT ."
 	else
 		message_box "Default" "Keeping default ports (HTTP: 80, HTTPS: 443)."
+		break
 	fi
 }
 
