@@ -210,7 +210,7 @@ function swap_menu() {
 		options=$(whiptail --title "Swap Menu" \
 			--menu "$MENU" $HEIGHT $WIDTH $CHOICE_HEIGHT \
 		    "1" "Add 2Gb-Swap" \
-		    "2" "Enable Swap"
+		    "2" "Enable Swap" \
 		    "3" "Disable Swap" \
 		    "4" "Exit" \
 		    3>&1 1>&2 2>&3) 
