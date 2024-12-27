@@ -209,17 +209,19 @@ function swap_menu() {
 	while true; do
 		options=$(whiptail --title "Swap Menu" \
 			--menu "$MENU" $HEIGHT $WIDTH $CHOICE_HEIGHT \
-		    "1" "Enable Swap" \
-		    "2" "Disable Swap" \
-		    "3" "Exit" \
+		    "1" "Add 2Gb-Swap" \
+		    "2" "Enable Swap"
+		    "3" "Disable Swap" \
+		    "4" "Exit" \
 		    3>&1 1>&2 2>&3) 
 		if [[ $? -ne 0 ]]; then
     			break
   		fi
 		case $options in
 			1) bash <(curl -sL "https://raw.githubusercontent.com/reshakk/Server-auto/master/script/swap.sh");;
-			2) bash <(curl -sL "https://raw.githubusercontent.com/reshakk/Server-auto/master/script/stop-swap.sh");;
-			3) break;;
+			2) bash <(curl -sL "https://raw.githubusercontent.com/reshakk/Server-auto/master/script/start-swap.sh");;
+			3) bash <(curl -sL "https://raw.githubusercontent.com/reshakk/Server-auto/master/script/stop-swap.sh");;
+			4) break;;
 		esac
 	done
 }
