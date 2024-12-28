@@ -538,7 +538,7 @@ function install_packages() {
   fi
 }
 
-#install_packages
+install_packages
 
 function message_box {
   local title=$1
