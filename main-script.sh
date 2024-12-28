@@ -335,9 +335,9 @@ function ssh_menu() {
 				fi
 				
 				if grep -q "^AllowUsers " "$SSHD_CONFIG"; then
-					sed -i "s/^AllowUsers .*/AllowUsers reshkk/" "$SSHD_CONFIG"
+					sed -i "s/^AllowUsers .*/AllowUsers $username/" "$SSHD_CONFIG"
 				else
-					echo "AllowUsers reshkk" >> "$SSHD_CONFIG"
+					echo "AllowUsers $username" >> "$SSHD_CONFIG"
 				fi
 				systemctl restart ssh.service
 				
