@@ -134,11 +134,16 @@ function view_user_menu() {
                 	;;
 		2)
                 	new_name=$(whiptail --inputbox "Enter new name for $username:" $HEIGHT $WIDTH 3>&1 1>&2 2>&3)
-                	usermod -l "$new_name" "$username"
-			mkdir /home/$new_name
-			chown $new_name:$username /home/$new_name
-			usermod -d /home/$new_name "$new_name"
-                	message_box "Successfully" "Name changed successfully to '$new_name' !"
+			if id "$new_name" >/dev/null 2>&1; then
+				message_box "Invalid Username" "Username already exists"
+				continue
+			else
+                		usermod -l "$new_name" "$username"
+				mkdir /home/$new_name
+				chown $new_name:$username /home/$new_name
+				usermod -d /home/$new_name "$new_name"
+                		message_box "Successfully" "Name changed successfully to '$new_name' !"
+			fi
                 	;;
             	3)
 			current_uid=$(awk -F: -v user="$username" '$1 == user {print $3}' /etc/passwd)
@@ -321,8 +326,19 @@ function ssh_menu() {
 				;;
 			2)
 				username=$(whiptail --inputbox "Enter username to allow ssh-connection" $HEIGHT $WIDTH 3>&1 1>&2 2>&3)
-				sed -i 's/^PermitRootLogin yes/PermitRootLogin no/' "$SSHD_CONFIG"
-				echo "AllowUsers $username" >> "$SSHD_CONFIG"
+				if grep -q "^PermitRootLogin " "$SSHD_CONFIG"; then
+        				sed -i "s/^PermitRootLogin .*/PermitRootLogin no/" "$SSHD_CONFIG"
+				elif grep -q "^#PermitRootLogin " "$SSHD_CONFIG"; then
+					sed -i "s/^#PermitRootLogin .*/PermitRootLogin no/" "$SSHD_CONFIG"
+				else
+					echo "PermitRootLogin no" >> "$SSHD_CONFIG"
+				fi
+				
+				if grep -q "^AllowUsers " "$SSHD_CONFIG"; then
+					sed -i "s/^AllowUsers .*/AllowUsers reshkk/" "$SSHD_CONFIG"
+				else
+					echo "AllowUsers reshkk" >> "$SSHD_CONFIG"
+				fi
 				systemctl restart ssh.service
 				
 				message_box "Successfully" "Allow '$username' ssh-connection "
@@ -351,16 +367,28 @@ function docker_menu() {
 		case $options in
 			1)
 				bash <(curl -sL "https://raw.githubusercontent.com/reshakk/Server-auto/master/script/docker-in.sh")
-				message_box "Successfully" "Docker is installed."
+				if ! which docker docker-compose >/dev/null 2>&1; then
+					message_box "Successfully" "Docker is installed."
+				else
+					message_box "Error" "Something gone wrong. Try installing manually from my github."
+				fi
 				;;
 			2)
 				generate_flatnotes
-				message_box "Successfully" "Generation docker.yml is successfully. "
+				if [[ -f /root/flatnotes/docker.yml ]]; then
+					message_box "Successfully" "Generation docker.yml is successfully. "
+				else
+					message_box "Error" "Something gone wrong. Try installing manually from my github."
+				fi
 				;;
 			3)
 				mkdir /root/Passky
 				wget -P /root/Passky https://github.com/Rabbit-Company/Passky-Server/blob/main/docker-compose.yml
-				message_box "Successfully" "Generation docker.yml is successfully. "
+				if [[ -f /root/Passky/docker.yml ]]; then
+					message_box "Successfully" "Generation docker.yml is successfully. "
+				else
+					message_box "Error" "Something gone wrong. Try installing manually from my github."
+				fi
 				;;
 			4)
 				break
@@ -467,7 +495,7 @@ function install_nextcloud() {
 	local HTTP_PORT
 	local HTTPS_PORT
 
-	snap install nextcloud
+	snap install nextcloud #Add check out
 	username=$(whiptail --inputbox "Enter username for admin:" $HEIGHT $WIDTH 3>&1 1>&2 2>3)
 	password=$(whiptail --passwordbox "Enter password for admin:" $HEIGHT $WIDTH 3>&1 1>&2 2>3)
 	trusted_domains=$(whiptail --inputbox "Enter trusted domains:"$HEIGHT $WIDTH 3>&1 1>&2 2>3)
