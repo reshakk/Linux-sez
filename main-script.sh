@@ -314,11 +314,11 @@ function ssh_menu() {
 				fi
 
 				if grep -q "^#Port 22" "$SSHD_CONFIG"; then
-					sed -i "s/^#Port 22/Port $PORT/" "$SSHD_CONFIG"
+					sed -i "s/^#Port 22/Port $new_port/" "$SSHD_CONFIG"
 				elif grep -q "^Port " "$SSHD_CONFIG"; then
-					sed -i "s/^Port .*/Port $PORT/" "$SSHD_CONFIG"
+					sed -i "s/^Port .*/Port $new_port/" "$SSHD_CONFIG"
 				else
-					echo "Port $PORT" >> "$SSHD_CONFIG"
+					echo "Port $new_port" >> "$SSHD_CONFIG"
 				fi
 				systemctl restart ssh.service
 
@@ -366,11 +366,15 @@ function docker_menu() {
   		fi
 		case $options in
 			1)
-				bash <(curl -sL "https://raw.githubusercontent.com/reshakk/Server-auto/master/script/docker-in.sh")
-				if ! which docker docker-compose >/dev/null 2>&1; then
-					message_box "Successfully" "Docker is installed."
+				if which docker docker-compose >/dev/null 2>&1; then
+					message_box "Error" "Docker is already installed."
 				else
-					message_box "Error" "Something gone wrong. Try installing manually from my github."
+					bash <(curl -sL "https://raw.githubusercontent.com/reshakk/Server-auto/master/script/docker-in.sh")
+					if which docker docker-compose >/dev/null 2>&1; then
+						message_box "Successfully" "Docker is installed."
+					else
+						message_box "Error" "Something gone wrong. Try installing manually from my github."
+					fi
 				fi
 				;;
 			2)
