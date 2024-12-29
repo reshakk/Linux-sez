@@ -234,15 +234,15 @@ function swap_menu() {
   		fi
 		case $options in
 			1) 
-				bash <(curl -sL "https://raw.githubusercontent.com/reshakk/Server-auto/master/script/swap.sh")
+				bash <(curl -sL "https://raw.githubusercontent.com/reshakk/Ubuntu-gez/master/script/swap.sh")
 				message_box "Successfully" "Swap successfully installed on your system."
 				;;
 			2) 
-				bash <(curl -sL "https://raw.githubusercontent.com/reshakk/Server-auto/master/script/start-swap.sh")
+				bash <(curl -sL "https://raw.githubusercontent.com/reshakk/Ubuntu-gez/master/script/start-swap.sh")
 				message_box "Successfully" "Swap successfully enable."
 				;;
 			3) 
-				bash <(curl -sL "https://raw.githubusercontent.com/reshakk/Server-auto/master/script/stop-swap.sh")	
+				bash <(curl -sL "https://raw.githubusercontent.com/reshakk/Ubuntu-gez/master/script/stop-swap.sh")	
 				message_box "Successfully" "Swap successfully stoped."
 				;;
 			4) break;;
@@ -266,7 +266,7 @@ function knockd_menu() {
     			break
   		fi
 		case $options in
-			1) bash <(curl -sL "https://raw.githubusercontent.com/reshakk/Server-auto/master/script/start-knock.sh");;
+			1) bash <(curl -sL "https://raw.githubusercontent.com/reshakk/Ubuntu-gez/master/script/start-knock.sh");;
 			2)
 				new_port=$(whiptail --inputbox "Enter new port for port-knocking (e.g: 7000,8000,9000)" $HEIGHT $WIDTH 3>&1 1>&2 2>&3)
 				sed -i "s/sequence = .*/sequence = $new_port/" /etc/knockd.conf
@@ -276,7 +276,7 @@ function knockd_menu() {
 					message_box "Failed" "Failed to restart knockd"
 				fi
 				;;
-			3) bash <(curl -sL "https://raw.githubusercontent.com/reshakk/Server-auto/master/script/stop-knock.sh");;
+			3) bash <(curl -sL "https://raw.githubusercontent.com/reshakk/Ubuntu-gez/master/script/stop-knock.sh");;
 			4)
 				apt remove knockd -y
 				rm -f /etc/knockd.conf 
@@ -335,9 +335,9 @@ function ssh_menu() {
 				fi
 				
 				if grep -q "^AllowUsers " "$SSHD_CONFIG"; then
-					sed -i "s/^AllowUsers .*/AllowUsers $username/" "$SSHD_CONFIG"
+					sed -i "s/^AllowUsers .*/AllowUsers reshkk/" "$SSHD_CONFIG"
 				else
-					echo "AllowUsers $username" >> "$SSHD_CONFIG"
+					echo "AllowUsers reshkk" >> "$SSHD_CONFIG"
 				fi
 				systemctl restart ssh.service
 				
@@ -369,7 +369,7 @@ function docker_menu() {
 				if which docker docker-compose >/dev/null 2>&1; then
 					message_box "Error" "Docker is already installed."
 				else
-					bash <(curl -sL "https://raw.githubusercontent.com/reshakk/Server-auto/master/script/docker-in.sh")
+					bash <(curl -sL "https://raw.githubusercontent.com/reshakk/Ubuntu-gez/master/script/docker-in.sh")
 					if which docker docker-compose >/dev/null 2>&1; then
 						message_box "Successfully" "Docker is installed."
 					else
@@ -504,7 +504,9 @@ function install_nextcloud() {
 	password=$(whiptail --passwordbox "Enter password for admin:" $HEIGHT $WIDTH 3>&1 1>&2 2>3)
 	trusted_domains=$(whiptail --inputbox "Enter trusted domains:"$HEIGHT $WIDTH 3>&1 1>&2 2>3)
 	nextcloud.manual-install "$username" "$password"
+	sleep 4
 	nextcloud.occ config:system:set trusted_domains 1 --value="$trusted_domains"
+	sleep 4
 	nextcloud.enable-https self-signed
 
 	if whiptail --title "Nextcloud Ports" --yesno "Do you wants to change HTTP/HTTPS ports?" $HEIGHT $WIDTH; then
