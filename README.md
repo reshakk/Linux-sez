@@ -4,7 +4,7 @@ A GUI script that serves for minimal user management, swap management, knockd se
 
 ## Main script for install:
 ``` bash
-bash <(curl -sL https://raw.githubusercontent.com/reshakk/Server-auto/master/main-script.sh)
+bash <(curl -sL https://raw.githubusercontent.com/reshakk/Ubuntu-gez/master/main-script.sh)
 ```
 
 ![image](https://github.com/reshakk/Server-auto/blob/main/GUI.png)
