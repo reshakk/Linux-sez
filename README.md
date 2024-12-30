@@ -24,5 +24,5 @@ bash <(curl -sL https://raw.githubusercontent.com/reshakk/Ubuntu-gez/master/main
 - `stop-swap.sh` - disable swap;
 
 ```
-bash <(curl -sL https://raw.githubusercontent.com/reshakk/Ubuntu-gez/master/script/name_script.sh)
+bash <(curl -sL https://raw.githubusercontent.com/reshakk/Ubuntu-gez/master/script/add_name_script.sh)
 ```
