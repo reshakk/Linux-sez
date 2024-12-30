@@ -382,16 +382,17 @@ function docker_menu() {
 				if [[ -f /root/flatnotes/docker.yml ]]; then
 					message_box "Successfully" "Generation docker.yml is successfully. "
 				else
-					message_box "Error" "Something gone wrong. Try installing manually from my github."
+					message_box "Error" "Something gone wrong. Try installing manually."
 				fi
 				;;
 			3)
-				mkdir /root/Passky
-				wget -P /root/Passky https://github.com/Rabbit-Company/Passky-Server/blob/main/docker-compose.yml
+				mkdir -p /root/Passky
+				cd /root/Passky
+				bash <(curl -sL "https://raw.githubusercontent.com/Rabbit-Company/Passky-Server/refs/heads/main/installerGUI.sh")
 				if [[ -f /root/Passky/docker.yml ]]; then
 					message_box "Successfully" "Generation docker.yml is successfully. "
 				else
-					message_box "Error" "Something gone wrong. Try installing manually from my github."
+					message_box "Error" "Something gone wrong. Try installing manually."
 				fi
 				;;
 			4)
@@ -403,7 +404,7 @@ function docker_menu() {
 }
 
 function generate_flatnotes(){
-	mkdir /root/flatnotes
+	mkdir -p /root/flatnotes
 	touch /root/flatnotes/docker.yml
 	cat >"/root/flatnotes/docker.yml" <<EOF
 	version: "3"
