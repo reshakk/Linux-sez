@@ -74,6 +74,7 @@ function add_user() {
 		
 		# Create the user
 		sudo useradd -m "$username" -p "$(openssl passwd -1 "$password")"	
+  		sudo chsh -s /bin/bash "$username"
 
 		whiptail --clear --backtitle "$BACKTITLE" --title "Add New User" \
 			--yes-button "View User" --no-button "Return" \
