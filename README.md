@@ -1,6 +1,6 @@
 # Server-auto
 
-A GUI script that serves for minimal user management, swap management, knockd service management, minimal interaction with sshd config, docker and two containers (Flatnotes and Passky) as well as nextcloud (which is deployed with snap).
+A GUI script that serves for minimal user management, swap management, knockd service management, minimal interaction with sshd config and docker.
 
 ## Main script for install:
 ``` bash
