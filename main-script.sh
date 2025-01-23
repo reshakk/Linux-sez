@@ -14,6 +14,18 @@ HEIGHT=30
 WIDTH=60
 CHOICE_HEIGHT=20
 
+function message_box {
+  local title=$1
+  local message=$2
+  whiptail \
+    --clear \
+    --backtitle "$BACKTITLE" \
+    --title "$title" \
+    --msgbox "$message" \
+    $HEIGHT $WIDTH \
+    3>&1 1>&2 2>&3
+}
+
 function main_menu() {
 	local selection
 	while true; do
@@ -26,7 +38,6 @@ function main_menu() {
 			"4" "Knockd" \
 			"5" "Ssh" \
 			"6" "Docker" \
-			"7" "Nextcloud" \
 			3>&1 1>&2 2>&3)
 		if [[ $? -ne 0 ]]; then
 			break
@@ -38,7 +49,6 @@ function main_menu() {
 			4) knockd_menu;;
 			5) ssh_menu;;
 			6) docker_menu;;
-			7) nextcloud_menu;;
 		esac
 	done	
 }
@@ -74,7 +84,7 @@ function add_user() {
 		
 		# Create the user
 		sudo useradd -m "$username" -p "$(openssl passwd -1 "$password")"	
-  		sudo chsh -s /bin/bash "$username"
+		sudo chsh -s /bin/bash "$username"
 
 		whiptail --clear --backtitle "$BACKTITLE" --title "Add New User" \
 			--yes-button "View User" --no-button "Return" \
@@ -299,8 +309,10 @@ function ssh_menu() {
 		options=$(whiptail --title "Ssh Menu" \
 			--menu "$MENU" $HEIGHT $WIDTH $CHOICE_HEIGHT \
 		    "1" "Change SSH-Port" \
-		    "2" "Root-Login and Allow User" \
-		    "3" "Exit" \
+		    "2" "Disable Root-Login and Allow User" \
+		    "3" "Change maximum auth attempts" \
+		    "4" "Disable passwd auth" \
+		    "5" "Exit" \
 		    3>&1 1>&2 2>&3) 
 		if [[ $? -ne 0 ]]; then
     			break
@@ -343,8 +355,35 @@ function ssh_menu() {
 				systemctl restart ssh.service
 				
 				message_box "Successfully" "Allow '$username' ssh-connection "
-				;;
+				;;	
 			3)
+				autht=$(whiptail --inputbox "Enter maximum auth attempts" $HEIGHT $WIDTH 3>&1 1>&2 2>&3)
+				if grep -q "^MaxAuthTries " "$SSHD_CONFIG"; then
+        				sed -i "s/^MaxAuthTries .*/MaxAuthTries $autht/" "$SSHD_CONFIG"
+				elif grep -q "^#MaxAuthTries " "$SSHD_CONFIG"; then
+					sed -i "s/^#MaxAuthTries .*/MaxAuthTries $autht/" "$SSHD_CONFIG"
+				else
+					echo "MaxAuthTries $autht" >> "$SSHD_CONFIG"
+				fi
+								
+				systemctl restart ssh.service
+
+				message_box "Successfully" "Successfully change max auth attempts to '$autht'. "
+				;;
+			4)
+				if grep -q "^PasswordAuthentication " "$SSHD_CONFIG"; then
+        				sed -i "s/^PasswordAuthentication .*/PasswordAuthentication no/" "$SSHD_CONFIG"
+				elif grep -q "^#PasswordAuthentication " "$SSHD_CONFIG"; then
+					sed -i "s/^#PasswordAuthentication .*/PasswordAuthentication no/" "$SSHD_CONFIG"
+				else
+					echo "PasswordAuthentication no" >> "$SSHD_CONFIG"
+				fi
+
+				systemctl restart ssh.service
+								
+				message_box "Successfully" "Successfully disable passwd auth."
+				;;
+			5)
 				break
 				;;
 		esac
@@ -387,16 +426,6 @@ function docker_menu() {
 				fi
 				;;
 			3)
-				mkdir -p /root/Passky
-				cd /root/Passky
-				bash <(curl -sL "https://raw.githubusercontent.com/Rabbit-Company/Passky-Server/refs/heads/main/installerGUI.sh")
-				if [[ -f /root/Passky/docker.yml ]]; then
-					message_box "Successfully" "Generation docker.yml is successfully. "
-				else
-					message_box "Error" "Something gone wrong. Try installing manually."
-				fi
-				;;
-			4)
 				break
 				;;
 		esac
@@ -431,102 +460,6 @@ function generate_flatnotes(){
 EOF
 }
 
-function nextcloud_menu() {
-	local options
-	local trusted_domains
-	local current_domains
-	local HTTP_PORT
-	local HTTPS_PORT
-	local username
-	local new_password
-	local confirm_password
-	while true; do
-		options=$(whiptail --title "Nextcloud Menu" \
-			--menu "$MENU" $HEIGHT $WIDTH $CHOICE_HEIGHT \
-		    "1" "Download and enable Nextcloud" \
-		    "2" "Change Ports" \
-		    "3" "Change Password" \
-		    "4" "Change Trusted Domains" \
-		    "5" "Exit" \
-		    3>&1 1>&2 2>&3) 
-		if [[ $? -ne 0 ]]; then
-    			break
-  		fi
-		case $options in
-			1)
-				install_nextcloud
-				message_box "Successfully" "Nextcloud successfully installed with snap. "
-				;;
-			2)
-				HTTP_PORT=$(whiptail --inputbox "Enter new HTTP-Port:" $HEIGHT $WIDTH 3>&1 1>&2 2>3)
-				HTTPS_PORT=$(whiptail --inputbox "Enter new HTTPS-Port:" $HEIGHT $WIDTH 3>&1 1>&2 2>3)
-				snap set nextcloud ports.http="$HTTP_PORT" ports.https="$HTTPS_PORT"
-				snap restart nextcloud
-				;;
-			3)
-				
-				username=$(whiptail --inputbox "Enter username:"$HEIGHT $WIDTH 3>&1 1>&2 2>3)
-				new_password=$(whiptail --inputbox "Enter New Password:"$HEIGHT $WIDTH 3>&1 1>&2 2>3)
-				confirm_password=$(whiptail --inputbox "Confirm the Password:"$HEIGHT $WIDTH 3>&1 1>&2 2>3)
-
-				if [[ new_password != confirm_password ]]; then
-					whiptail message_box "Invalid Password" "Password do not match"
-					confirm
-				fi
-				sudo -u www-data php /var/www/nextcloud/occ user:resetpassword "$username" <<< "$NEW_PASSWORD"
-				snap restart nextcloud
-
-				message_box "Successfully" "The password has been changed for the $username "
-				;;
-			4)
-				current_domains=$(nextcloud.occ config:system:get trusted_domains)
-				message_box "Current Trusted Domains:" " '$current_domains' "
-				trusted_domains=$(whiptail --inputbox "Enter trusted domains:"$HEIGHT $WIDTH 3>&1 1>&2 2>3)
-				nextcloud.occ config:system:set trusted_domains 1 --value="$trusted_domains"
-				snap restart nextcloud
-				;;
-			5)
-				break
-				;;
-		esac
-	done
-
-
-}
-
-function install_nextcloud() {
-	local username
-	local password
-	local trusted_domains
-	local HTTP_PORT
-	local HTTPS_PORT
-
-	snap install nextcloud #Add check out
-	username=$(whiptail --inputbox "Enter username for admin:" $HEIGHT $WIDTH 3>&1 1>&2 2>3)
-	password=$(whiptail --passwordbox "Enter password for admin:" $HEIGHT $WIDTH 3>&1 1>&2 2>3)
-	trusted_domains=$(whiptail --inputbox "Enter trusted domains:"$HEIGHT $WIDTH 3>&1 1>&2 2>3)
-	nextcloud.manual-install "$username" "$password"
-	sleep 4
-	nextcloud.occ config:system:set trusted_domains 1 --value="$trusted_domains"
-	sleep 4
-	nextcloud.enable-https self-signed
-
-	if whiptail --title "Nextcloud Ports" --yesno "Do you wants to change HTTP/HTTPS ports?" $HEIGHT $WIDTH; then
-		HTTP_PORT=$(whiptail --inputbox "Enter new HTTP-Port:" $HEIGHT $WIDTH 3>&1 1>&2 2>3)
-		HTTPS_PORT=$(whiptail --inputbox "Enter new HTTPS-Port:" $HEIGHT $WIDTH 3>&1 1>&2 2>3)
-
-		HTTP_PORT=${HTTP_PORT:-80}
-		HTTPS_PORT=${HTTPS_PORT:-443}
-
-		snap set nextcloud ports.http="$HTTP_PORT" ports.https="$HTTPS_PORT"
-		snap restart nextcloud
-
-		message_box "Successfully" "Change https/http to $HTTPS_PORT $HTTP_PORT ."
-	else
-		message_box "Default" "Keeping default ports (HTTP: 80, HTTPS: 443)."
-		break
-	fi
-}
 
 function install_packages() {
   if ! which wget whiptail curl zip unzip snapd >/dev/null 2>&1; then
@@ -548,18 +481,6 @@ function install_packages() {
 
 install_packages
 
-function message_box {
-  local title=$1
-  local message=$2
-  whiptail \
-    --clear \
-    --backtitle "$BACKTITLE" \
-    --title "$title" \
-    --msgbox "$message" \
-    $HEIGHT $WIDTH \
-    3>&1 1>&2 2>&3
-}
-
 if [[ $? -eq 0 ]]; then
 	echo "Package install successfully. Starting main-script..."
 	sleep 2
@@ -568,6 +489,10 @@ else
 	echo "Failed to install packages."
 	exit
 fi
+
+
+
+
 
 
 #main_menu
