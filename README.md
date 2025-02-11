@@ -4,7 +4,7 @@ A GUI script that serves for minimal user management, swap management, knockd se
 
 ## Main script for install:
 ``` bash
-bash <(curl -sL https://raw.githubusercontent.com/reshakk/Ubuntu-gez/master/main-script.sh)
+bash <(curl -sL https://raw.githubusercontent.com/reshakk/Ubuntu-gez/master/main_script.sh)
 ```
 
 ![image](https://github.com/reshakk/Server-auto/blob/main/GUI.png)
@@ -16,12 +16,13 @@ bash <(curl -sL https://raw.githubusercontent.com/reshakk/Ubuntu-gez/master/main
 
 ### Other scripts
 **You can also run the scripts separately:**
-- `docker-in.sh` - installer docker;
-- `start-knock.sh` - downloads knockd, creates configuration files, and configures rules for iptables;
-- `stop-knock.sh` - stop knockd-service;
+- `docker_in.sh` - installer docker;
+- `start_knock.sh` - downloads knockd, creates configuration files, and configures rules for iptables;
+- `stop_knock.sh` - stop knockd-service;
 - `swap.sh` - 2 GB swap;
-- `start-swap.sh` - enable swap in fstab;
-- `stop-swap.sh` - disable swap;
+- `start_swap.sh` - enable swap in fstab;
+- `stop_swap.sh` - disable swap;
+- `r_passw` - random password (first argument - length of password)
 
 ```
 bash <(curl -sL https://raw.githubusercontent.com/reshakk/Ubuntu-gez/master/script/add_name_script.sh)
