@@ -26,6 +26,7 @@ function message_box {
     3>&1 1>&2 2>&3
 }
 
+
 function main_menu() {
 	local selection
 	while true; do
@@ -91,7 +92,7 @@ function add_user() {
 			--yesno 'User  "'"${username}"'" has been created.' \
 			$HEIGHT $WIDTH \
 			3>&1 1>&2 2>&3
-		if [[ $? -ne 0 ]]; then
+		if [[ $? -ne 0 ]]; thenPort-knocking was successfully installed
 			break
 		fi
 		
@@ -246,15 +247,28 @@ function swap_menu() {
 		case $options in
 			1) 
 				bash <(curl -sL "https://raw.githubusercontent.com/reshakk/Ubuntu-gez/master/script/swap.sh")
-				message_box "Successfully" "Swap successfully installed on your system."
+				if [[ $? -eq 0 ]]; then
+					message_box "Successfully" "Swap was set up and enabled."
+				else
+					message_box "Failed" "Failed to set up swap. Try it manually from github. "
+				fi	
+				
 				;;
 			2) 
 				bash <(curl -sL "https://raw.githubusercontent.com/reshakk/Ubuntu-gez/master/script/start-swap.sh")
-				message_box "Successfully" "Swap successfully enable."
+				if [[ $? -eq 0 ]]; then
+					message_box "Successfully" "Swap enable."
+				else
+					message_box "Failed" "Failed enable swap. Try it manually from github. "
+				fi	
 				;;
 			3) 
 				bash <(curl -sL "https://raw.githubusercontent.com/reshakk/Ubuntu-gez/master/script/stop-swap.sh")	
-				message_box "Successfully" "Swap successfully stoped."
+				if [[ $? -eq 0 ]]; then
+					message_box "Successfully" "Swap was successfully stopped."
+				else
+					message_box "Failed" "Failed to stop swap. Try it manually from github. "
+				fi	
 				;;
 			4) break;;
 		esac
@@ -277,7 +291,14 @@ function knockd_menu() {
     			break
   		fi
 		case $options in
-			1) bash <(curl -sL "https://raw.githubusercontent.com/reshakk/Ubuntu-gez/master/script/start-knock.sh");;
+			1) 
+				bash <(curl -sL "https://raw.githubusercontent.com/reshakk/Ubuntu-gez/master/script/start-knock.sh")
+				if [[ $? -eq 0 ]]; then
+					message_box "Successfully" "Port-knocking was successfully installed."
+				else
+					message_box "Failed" "Failed to started port-knocking. Try installing manually from github. "
+				fi	
+				;;
 			2)
 				new_port=$(whiptail --inputbox "Enter new port for port-knocking (e.g: 7000,8000,9000)" $HEIGHT $WIDTH 3>&1 1>&2 2>&3)
 				sed -i "s/sequence = .*/sequence = $new_port/" /etc/knockd.conf
@@ -287,7 +308,14 @@ function knockd_menu() {
 					message_box "Failed" "Failed to restart knockd"
 				fi
 				;;
-			3) bash <(curl -sL "https://raw.githubusercontent.com/reshakk/Ubuntu-gez/master/script/stop-knock.sh");;
+			3) 
+				bash <(curl -sL "https://raw.githubusercontent.com/reshakk/Ubuntu-gez/master/script/stop-knock.sh")
+				if [[ $? -eq 0 ]]; then
+					message_box "Successfully" "Port-knocking was successfully stopped."
+				else
+					message_box "Failed" "Failed to stoped service knockd. Try to stop it manually. "
+				fi	
+				;;
 			4)
 				apt remove knockd -y
 				rm -f /etc/knockd.conf 
@@ -322,7 +350,7 @@ function ssh_menu() {
 				new_port=$(whiptail --inputbox "Enter new ssh-port" $HEIGHT $WIDTH 3>&1 1>&2 2>&3)
 				#read -p "Enter new port(It's better to choose after 1024): " PORT 
 				if ! [[ "$new_port" =~ ^[0-9]+$ ]] || [[ "$new_port" -le 1024 ]] || [[ "$new_port" -ge 65535 ]]; then
-					echo "Invalid port number. Please enter a number between 1025 and 65535."
+					message_box "Invalid" "Invalid port number. Please enter a number between 1025 and 65535."
 					continue
 				fi
 
@@ -391,6 +419,118 @@ function ssh_menu() {
 
 }
 
+
+function generate_flatnotes(){ #Add prompts
+	local username=$(whiptail --inputbox "Please enter user name: "  $HEIGHT $WIDTH  3>&1 1>&2 2>&3)	
+	local fpasswd=$(whiptail --passwordbox "Please enter password: "  $HEIGHT $WIDTH  3>&1 1>&2 2>&3)
+	local secret_key=$(whiptail --passwordbox "Please enter secret-key: "  $HEIGHT $WIDTH  3>&1 1>&2 2>&3)
+	local new_port=$(whiptail --inputbox "Please enter port: "  $HEIGHT $WIDTH "8080"  3>&1 1>&2 2>&3)
+	mkdir -p /root/flatnotes
+	cat >"/root/flatnotes/docker-compose.yaml" <<EOF
+	version: "3"
+
+	services:
+  		flatnotes:
+    		  container_name: flatnotes
+    		  image: dullage/flatnotes:latest
+    		  environment:
+      		    PUID: 1000
+		    PGID: 1000
+      		    FLATNOTES_AUTH_TYPE: "password"
+      		    FLATNOTES_USERNAME: "$username"
+      		    FLATNOTES_PASSWORD: "$fpasswd"
+      		    FLATNOTES_SECRET_KEY: "$secret_key"
+    		  volumes:
+     		     - "./data:/data"
+      			# Optional. Allows you to save the search index in a different location: 
+      			# - "./index:/data/.flatnotes"
+    		  ports:
+     		    - "$new_port:8080"
+    		  restart: unless-stopped
+EOF
+}
+
+function generate_nextcloud() {
+	local nw_dock="nextcloud_network"
+	local up_http=$(whiptail --inputbox "Please enter http-port: "  $HEIGHT $WIDTH "80" 3>&1 1>&2 2>&3)
+	local up_https=$(whiptail --inputbox "Please enter https-port: "  $HEIGHT $WIDTH "443" 3>&1 1>&2 2>&3)
+	local ip_addr=$(hostname -I | awk '{print $1}')
+	local mysql_proot=$(whiptail --passwordbox "Enter new password for root-mysql:" $HEIGHT $WIDTH 3>&1 1>&2 2>&3)
+	local mysql_pdb=$(whiptail --passwordbox "Enter new password for mysql:" $HEIGHT $WIDTH 3>&1 1>&2 2>&3)
+	docker network create $nw_dock
+	mkdir -p /root/nextcloud
+	cat >"/root/nextcloud/docker-compose.yaml" <<EOF
+version: '3'
+services:
+  proxy:
+    image: jwilder/nginx-proxy:alpine
+    labels:
+      - "com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy=true"
+    container_name: nextcloud-proxy
+    networks:
+      - $nw_dock
+    ports:
+      - $up_http:80
+      - $up_https:443
+    volumes:
+      - ./proxy/conf.d:/etc/nginx/conf.d:rw
+      - ./proxy/vhost.d:/etc/nginx/vhost.d:rw
+      - ./proxy/html:/usr/share/nginx/html:rw
+      - ./proxy/certs:/etc/nginx/certs:ro
+      - /etc/localtime:/etc/localtime:ro
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+    restart: unless-stopped
+
+  db:
+    image: mariadb
+    container_name: nextcloud-mariadb
+    networks:
+      - $nw_dock
+    volumes:
+      - db:/var/lib/mysql
+      - /etc/localtime:/etc/localtime:ro
+    environment:
+      - MYSQL_ROOT_PASSWORD
+      - MYSQL_PASSWORD
+      - MYSQL_DATABASE
+      - MYSQL_USER
+    restart: unless-stopped
+
+  app:
+    image: nextcloud:latest
+    container_name: nextcloud-app
+    networks:
+      - $nw_dock
+    depends_on:
+      - proxy
+      - db
+    volumes:
+      - nextcloud:/var/www/html
+      - ./app/config:/var/www/html/config
+      - ./app/custom_apps:/var/www/html/custom_apps
+      - ./app/data:/var/www/html/data
+      - ./app/themes:/var/www/html/themes
+      - /etc/localtime:/etc/localtime:ro
+    environment:
+      - VIRTUAL_HOST=$ip_addr
+    restart: unless-stopped
+
+volumes:
+  nextcloud:
+  db:
+
+networks:
+  $nw_dock:
+EOF
+
+cat > "/root/nextcloud/.env" << EOF
+MYSQL_ROOT_PASSWORD=$mysql_proot
+MYSQL_PASSWORD=$mysql_pdb
+MYSQL_DATABASE=nextcloud
+MYSQL_USER=nextcloud
+EOF
+}
+
 function docker_menu() {
 	local options
 	while true; do
@@ -399,7 +539,8 @@ function docker_menu() {
 		    "1" "Install Docker" \
 		    "2" "Install Flatnotes" \
 		    "3" "Install Passky" \
-		    "4" "Exit" \
+		    "4" "Install Nextcloud" \
+		    "5" "Exit" \
 		    3>&1 1>&2 2>&3) 
 		if [[ $? -ne 0 ]]; then
     			break
@@ -418,14 +559,34 @@ function docker_menu() {
 				fi
 				;;
 			2)
-				generate_flatnotes
-				if [[ -f /root/flatnotes/docker.yml ]]; then
-					message_box "Successfully" "Generation docker.yml is successfully. "
+				if ! which docker docker-compose >/dev/null 2>&1; then
+					message_box "Error" "Install docker."
 				else
-					message_box "Error" "Something gone wrong. Try installing manually."
+					generate_flatnotes
+					if [[ $? -eq 0 ]] || [[ -f /root/flatnotes/docker-compose.yaml ]];  then
+						message_box "Successfully" "Generation docker-compose.yaml is successfully. "
+					else
+						message_box "Error" "Something gone wrong. Try installing manually."
+					fi
 				fi
 				;;
 			3)
+				message_box "Sorry" "This container doesn't work yet."
+				;;
+			4)
+				if  which docker docker-compose >/dev/null 2>&1; then
+					generate_nextcloud
+					if [[ $? -eq 0 ]] || [[ -f /root/nextcloud/docker-compose.yaml ]];  then
+						message_box "Successfully" "Generation docker-compose.yaml is successfully. "
+					else
+						message_box "Error" "Something gone wrong. Try installing manually."
+					fi
+				else
+					message_box "Error" "Install docker."
+				fi
+
+				;;
+			5)
 				break
 				;;
 		esac
@@ -433,45 +594,17 @@ function docker_menu() {
 
 }
 
-function generate_flatnotes(){
-	mkdir -p /root/flatnotes
-	touch /root/flatnotes/docker.yml
-	cat >"/root/flatnotes/docker.yml" <<EOF
-	version: "3"
-
-	services:
-  		flatnotes:
-    		  container_name: flatnotes
-    		  image: dullage/flatnotes:latest
-    		  environment:
-      		    PUID: 1000
-		    PGID: 1000
-      		    FLATNOTES_AUTH_TYPE: "password"
-      		    FLATNOTES_USERNAME: "user"
-      		    FLATNOTES_PASSWORD: "changeMe!"
-      		    FLATNOTES_SECRET_KEY: "aLongRandomSeriesOfCharacters"
-    		  volumes:
-     		     - "./data:/data"
-      			# Optional. Allows you to save the search index in a different location: 
-      			# - "./index:/data/.flatnotes"
-    		  ports:
-     		    - "8080:8080"
-    		  restart: unless-stopped
-EOF
-}
-
-
 function install_packages() {
-  if ! which wget whiptail curl zip unzip snapd >/dev/null 2>&1; then
+  if ! which wget whiptail curl zip unzip >/dev/null 2>&1; then
     if which apt >/dev/null 2>&1; then
       apt update
-      DEBIAN_FRONTEND=noninteractive apt install wget whiptail curl zip unzip snapd  -y
+      DEBIAN_FRONTEND=noninteractive apt install wget whiptail curl zip unzip -y
       return 0
     fi
     if which yum >/dev/null 2>&1; then
       yum makecache
       yum install epel-release -y || true
-      yum install wget whiptail curl zip unzip snapd  -y
+      yum install wget whiptail curl zip unzip -y
       return 0
     fi
     echo "OS is not supported!"
