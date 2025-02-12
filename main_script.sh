@@ -92,7 +92,7 @@ function add_user() {
 			--yesno 'User  "'"${username}"'" has been created.' \
 			$HEIGHT $WIDTH \
 			3>&1 1>&2 2>&3
-		if [[ $? -ne 0 ]]; thenPort-knocking was successfully installed
+		if [[ $? -ne 0 ]]; then
 			break
 		fi
 		
