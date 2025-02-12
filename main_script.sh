@@ -255,7 +255,7 @@ function swap_menu() {
 				
 				;;
 			2) 
-				bash <(curl -sL "https://raw.githubusercontent.com/reshakk/Ubuntu-gez/master/script/start-swap.sh")
+				bash <(curl -sL "https://raw.githubusercontent.com/reshakk/Ubuntu-gez/master/script/start_swap.sh")
 				if [[ $? -eq 0 ]]; then
 					message_box "Successfully" "Swap enable."
 				else
@@ -263,7 +263,7 @@ function swap_menu() {
 				fi	
 				;;
 			3) 
-				bash <(curl -sL "https://raw.githubusercontent.com/reshakk/Ubuntu-gez/master/script/stop-swap.sh")	
+				bash <(curl -sL "https://raw.githubusercontent.com/reshakk/Ubuntu-gez/master/script/stop_swap.sh")	
 				if [[ $? -eq 0 ]]; then
 					message_box "Successfully" "Swap was successfully stopped."
 				else
@@ -292,7 +292,7 @@ function knockd_menu() {
   		fi
 		case $options in
 			1) 
-				bash <(curl -sL "https://raw.githubusercontent.com/reshakk/Ubuntu-gez/master/script/start-knock.sh")
+				bash <(curl -sL "https://raw.githubusercontent.com/reshakk/Ubuntu-gez/master/script/start_knock.sh")
 				if [[ $? -eq 0 ]]; then
 					message_box "Successfully" "Port-knocking was successfully installed."
 				else
@@ -309,7 +309,7 @@ function knockd_menu() {
 				fi
 				;;
 			3) 
-				bash <(curl -sL "https://raw.githubusercontent.com/reshakk/Ubuntu-gez/master/script/stop-knock.sh")
+				bash <(curl -sL "https://raw.githubusercontent.com/reshakk/Ubuntu-gez/master/script/stop_knock.sh")
 				if [[ $? -eq 0 ]]; then
 					message_box "Successfully" "Port-knocking was successfully stopped."
 				else
