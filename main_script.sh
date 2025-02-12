@@ -550,7 +550,7 @@ function docker_menu() {
 				if which docker docker-compose >/dev/null 2>&1; then
 					message_box "Error" "Docker is already installed."
 				else
-					bash <(curl -sL "https://raw.githubusercontent.com/reshakk/Ubuntu-gez/master/script/docker-in.sh")
+					bash <(curl -sL "https://raw.githubusercontent.com/reshakk/Ubuntu-gez/master/script/docker_in.sh")
 					if which docker docker-compose >/dev/null 2>&1; then
 						message_box "Successfully" "Docker is installed."
 					else
