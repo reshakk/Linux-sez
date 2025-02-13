@@ -141,11 +141,17 @@ function view_user_menu() {
 		case $user_config in
 		1)
                 	new_password=$(whiptail --passwordbox "Enter new password for $username:" $HEIGHT $WIDTH 3>&1 1>&2 2>&3)
+			if [[ $? -ne 0 ]]; then
+    				break
+  			fi
                 	echo "$username:$new_password" | chpasswd
                 	message_box "Successfully" "Password changed successfully!"
                 	;;
 		2)
                 	new_name=$(whiptail --inputbox "Enter new name for $username:" $HEIGHT $WIDTH 3>&1 1>&2 2>&3)
+			if [[ $? -ne 0 ]]; then
+    				break
+  			fi
 			if id "$new_name" >/dev/null 2>&1; then
 				message_box "Invalid Username" "Username already exists"
 				continue
@@ -161,6 +167,9 @@ function view_user_menu() {
 			current_uid=$(awk -F: -v user="$username" '$1 == user {print $3}' /etc/passwd)
 			message_box "Current UID:" " '$current_uid' "
                 	new_uid=$(whiptail --inputbox "Enter new UID for $username:" $HEIGHT $WIDTH 3>&1 1>&2 2>&3)
+			if [[ $? -ne 0 ]]; then
+    				break
+  			fi
                 	usermod -u "$new_uid" "$username"
                 	message_box "Successfully" "UID changed successfully to '$new_uid' !"
                 	;;
@@ -168,6 +177,9 @@ function view_user_menu() {
 			current_guid=$(awk -F: -v user="$username" '$1 == user {print $4}' /etc/passwd)
 			message_box "Current GUID:" " '$current_guid' "
                 	new_gid=$(whiptail --inputbox "Enter new GID for $username:" $HEIGHT $WIDTH 3>&1 1>&2 2>&3)
+			if [[ $? -ne 0 ]]; then
+    				break
+  			fi
                 	usermod -g "$new_gid" "$username"
                 	message_box "Successfully" "GID changed successfully to '$new_gid' !"
                 	;;
@@ -175,6 +187,9 @@ function view_user_menu() {
 			current_groups=$(groups $username)
                 	message_box "Current Groups:" " $current_groups "
 			new_groups=$(whiptail --inputbox "Enter new groups for $username (comma-separated):" $HEIGHT $WIDTH 3>&1 1>&2 2>&3)
+			if [[ $? -ne 0 ]]; then
+    				break
+  			fi
                 	usermod -G "$new_groups" "$username"
                 	message_box "Successfully" "New group added successfully!"
                 	;;
@@ -182,6 +197,9 @@ function view_user_menu() {
 			current_shell=$(awk -F: -v user="$username" '$1 == user {print $7}' /etc/passwd)
 			message_box "Current Shell:" " $current_shell "
                 	new_shell=$(whiptail --inputbox "Enter new shell for $username:" $HEIGHT $WIDTH 3>&1 1>&2 2>&3)
+			if [[ $? -ne 0 ]]; then
+    				break
+  			fi
                 	usermod -s "$new_shell" "$username"
                 	message_box "Successfully" "Shell changed successfully to '$new_shell' !"
                 	;;
@@ -189,6 +207,9 @@ function view_user_menu() {
 			current_directory=$(awk -F: -v user="$username" '$1 == user {print $6}' /etc/passwd)
 			message_box "Current Home Directory:" " '$current_directory' "
                 	new_directory=$(whiptail --inputbox "Enter new home directory for $username:" $HEIGHT $WIDTH 3>&1 1>&2 2>&3)
+			if [[ $? -ne 0 ]]; then
+    				break
+  			fi
                 	usermod -d "$new_directory" "$username"
 			mv "$current_directory/*" "$new_directory"
 			#rm -rf "$current_directory"
@@ -210,7 +231,8 @@ function view_user_menu() {
 
 function list_users_menu() {
 	local title=$1
-	local optionslocal selection
+	local options
+	local selection
 	
 	options=$(awk -F: '$3 > 999 && $3 < 65534 {print $1, $1}' /etc/passwd)
 
@@ -301,7 +323,11 @@ function knockd_menu() {
 				;;
 			2)
 				new_port=$(whiptail --inputbox "Enter new port for port-knocking (e.g: 7000,8000,9000)" $HEIGHT $WIDTH 3>&1 1>&2 2>&3)
+				if [[ $? -ne 0 ]]; then
+    					break
+  				fi
 				sed -i "s/sequence = .*/sequence = $new_port/" /etc/knockd.conf
+				
 				if systemctl restart knockd.service; then
 					message_box "Successfully" "Port changed successfully to '$new_port' "
 				else
@@ -330,9 +356,9 @@ function knockd_menu() {
 function ssh_menu() {
 	local options
 	local new_port
-	local username
-	local SSHD_CONFIG 
-	SSHD_CONFIG="/etc/ssh/sshd_config"
+	local list_user
+	local selection
+	local SSHD_CONFIG="/etc/ssh/sshd_config"
 	while true; do
 		options=$(whiptail --title "Ssh Menu" \
 			--menu "$MENU" $HEIGHT $WIDTH $CHOICE_HEIGHT \
@@ -361,12 +387,29 @@ function ssh_menu() {
 				else
 					echo "Port $new_port" >> "$SSHD_CONFIG"
 				fi
-				systemctl restart ssh.service
 
-				message_box "Successfully" "Successfuly change port to '$new_port' "
+				if systemctl restart ssh.service; then
+					message_box "Successfully" "Successfuly change port to '$new_port' "
+				else
+					message_box "Failed" "Something get wrong."
+				fi
 				;;
 			2)
-				username=$(whiptail --inputbox "Enter username to allow ssh-connection" $HEIGHT $WIDTH 3>&1 1>&2 2>&3)
+
+				list_user=$(awk -F: '$3 > 999 && $3 < 65534 {print $1, $1}' /etc/passwd)
+
+  				if [[ -z "$list_user" ]]; then
+    					message_box "Error" "No User Found."
+    					return
+				fi
+				selection=$(whiptail --clear --noitem --backtitle "$BACKTITLE" --title "$title" \
+					--menu "Select the user" $HEIGHT $WIDTH $CHOICE_HEIGHT $list_user \
+					--ok-button "Select" --cancel-button "Return" \
+					3>&1 1>&2 2>&3)
+				if [[ $? -ne 0 ]]; then
+					return
+				fi
+
 				if grep -q "^PermitRootLogin " "$SSHD_CONFIG"; then
         				sed -i "s/^PermitRootLogin .*/PermitRootLogin no/" "$SSHD_CONFIG"
 				elif grep -q "^#PermitRootLogin " "$SSHD_CONFIG"; then
@@ -376,13 +419,16 @@ function ssh_menu() {
 				fi
 				
 				if grep -q "^AllowUsers " "$SSHD_CONFIG"; then
-					sed -i "s/^AllowUsers .*/AllowUsers $username/" "$SSHD_CONFIG"
+					sed -i "s/^AllowUsers .*/AllowUsers $selection/" "$SSHD_CONFIG"
 				else
-					echo "AllowUsers $username" >> "$SSHD_CONFIG"
+					echo "AllowUsers $selection" >> "$SSHD_CONFIG"
 				fi
-				systemctl restart ssh.service
-				
-				message_box "Successfully" "Allow '$username' ssh-connection "
+
+				if systemctl restart ssh.service; then
+					message_box "Successfully" "Allow '$selection' ssh-connection "
+				else
+					message_box "Failed" "Something gone wrong."
+				fi
 				;;	
 			3)
 				autht=$(whiptail --inputbox "Enter maximum auth attempts" $HEIGHT $WIDTH 3>&1 1>&2 2>&3)
@@ -394,9 +440,11 @@ function ssh_menu() {
 					echo "MaxAuthTries $autht" >> "$SSHD_CONFIG"
 				fi
 								
-				systemctl restart ssh.service
-
-				message_box "Successfully" "Successfully change max auth attempts to '$autht'. "
+				if systemctl restart ssh.service; then
+					message_box "Successfully" "Successfully change max auth attempts to '$autht'. "
+				else
+					message_box "Failed" "Something gone wrong."
+				fi
 				;;
 			4)
 				if grep -q "^PasswordAuthentication " "$SSHD_CONFIG"; then
@@ -407,9 +455,11 @@ function ssh_menu() {
 					echo "PasswordAuthentication no" >> "$SSHD_CONFIG"
 				fi
 
-				systemctl restart ssh.service
-								
-				message_box "Successfully" "Successfully disable passwd auth."
+				if systemctl restart ssh.service; then
+					message_box "Successfully" "Successfully disable passwd auth."
+				else
+					message_box "Failed" "Something gone wrong."
+				fi
 				;;
 			5)
 				break
@@ -457,6 +507,7 @@ function generate_nextcloud() {
 	local ip_addr=$(hostname -I | awk '{print $1}')
 	local mysql_proot=$(whiptail --passwordbox "Enter new password for root-mysql:" $HEIGHT $WIDTH 3>&1 1>&2 2>&3)
 	local mysql_pdb=$(whiptail --passwordbox "Enter new password for mysql:" $HEIGHT $WIDTH 3>&1 1>&2 2>&3)
+	local mysql_user=$(whiptail --inputbox "Please enter name for sql-user: "  $HEIGHT $WIDTH "user" 3>&1 1>&2 2>&3)
 	docker network create $nw_dock
 	mkdir -p /root/nextcloud
 	cat >"/root/nextcloud/docker-compose.yaml" <<EOF
@@ -527,7 +578,7 @@ cat > "/root/nextcloud/.env" << EOF
 MYSQL_ROOT_PASSWORD=$mysql_proot
 MYSQL_PASSWORD=$mysql_pdb
 MYSQL_DATABASE=nextcloud
-MYSQL_USER=nextcloud
+MYSQL_USER=$mysql_user
 EOF
 }
 
@@ -586,9 +637,7 @@ function docker_menu() {
 				fi
 
 				;;
-			5)
-				break
-				;;
+			5)break;;
 		esac
 	done
 
