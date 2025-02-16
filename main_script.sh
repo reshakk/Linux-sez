@@ -508,7 +508,7 @@ function generate_nextcloud() {
 	local mysql_proot=$(whiptail --passwordbox "Enter new password for root-mysql:" $HEIGHT $WIDTH 3>&1 1>&2 2>&3)
 	local mysql_pdb=$(whiptail --passwordbox "Enter new password for mysql:" $HEIGHT $WIDTH 3>&1 1>&2 2>&3)
 	local mysql_user=$(whiptail --inputbox "Please enter name for sql-user: "  $HEIGHT $WIDTH "user" 3>&1 1>&2 2>&3)
-	docker network create $nw_dock
+	# docker network create $nw_dock
 	mkdir -p /opt/nextcloud
 	cat >"/opt/nextcloud/docker-compose.yaml" <<EOF
 # NextCLoud with MariaDB/MySQL
