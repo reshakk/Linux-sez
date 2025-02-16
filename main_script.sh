@@ -511,74 +511,50 @@ function generate_nextcloud() {
 	docker network create $nw_dock
 	mkdir -p /opt/nextcloud
 	cat >"/opt/nextcloud/docker-compose.yaml" <<EOF
-version: '3'
+# NextCLoud with MariaDB/MySQL
+#
+# Access via "http://localhost:$up_http" (or "http://$ip_addr:$up_http" if using docker-machine)
+#
+# During initial NextCLoud setup, select "Storage & database" --> "Configure the database" --> "MySQL/MariaDB"
+# Database user: $mysql_user 
+# Database password: $mysql_pdb
+# Database name: ncdb
+# Database host: replace "localhost" with "maria-db" the same name as the data base container name.
+#
+#
+# The reason for the more refined data persistence in the volumes is because if you were to
+# use just the the '/var/www/html' then everytime you would want/need to update/upgrade
+# NextCloud you would have to go into the volume on the host machine and delete 'version.php'
+#
+
+version: '2'
+
 services:
-  proxy:
-    image: jwilder/nginx-proxy:alpine
-    labels:
-      - "com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy=true"
-    container_name: nextcloud-proxy
-    networks:
-      - $nw_dock
+
+  nextcloud:
+    container_name: nextcloud
+    restart: unless-stopped
+    image: nextcloud
     ports:
       - $up_http:80
-      - $up_https:443
     volumes:
-      - ./proxy/conf.d:/etc/nginx/conf.d:rw
-      - ./proxy/vhost.d:/etc/nginx/vhost.d:rw
-      - ./proxy/html:/usr/share/nginx/html:rw
-      - ./proxy/certs:/etc/nginx/certs:ro
-      - /etc/localtime:/etc/localtime:ro
-      - /var/run/docker.sock:/tmp/docker.sock:ro
-    restart: unless-stopped
-
-  db:
-    image: mariadb
-    container_name: nextcloud-mariadb
-    networks:
-      - $nw_dock
-    volumes:
-      - db:/var/lib/mysql
-      - /etc/localtime:/etc/localtime:ro
-    environment:
-      - MYSQL_ROOT_PASSWORD
-      - MYSQL_PASSWORD
-      - MYSQL_DATABASE
-      - MYSQL_USER
-    restart: unless-stopped
-
-  app:
-    image: nextcloud:latest
-    container_name: nextcloud-app
-    networks:
-      - $nw_dock
+      - /opt/containers/cloud/nextcloud/apps:/var/www/html/apps
+      - /opt/containers/cloud/nextcloud/config:/var/www/html/config
+      - /opt/containers/cloud/nextcloud/data:/var/www/html/data
     depends_on:
-      - proxy
       - db
-    volumes:
-      - nextcloud:/var/www/html
-      - ./app/config:/var/www/html/config
-      - ./app/custom_apps:/var/www/html/custom_apps
-      - ./app/data:/var/www/html/data
-      - ./app/themes:/var/www/html/themes
-      - /etc/localtime:/etc/localtime:ro
-    environment:
-      - VIRTUAL_HOST=$ip_addr
-    restart: unless-stopped
 
-volumes:
-  nextcloud:
   db:
-
-networks:
-  $nw_dock:
-EOF
-
-cat > "/opt/nextcloud/.env" << EOF
-MYSQL_ROOT_PASSWORD=$mysql_proot
-MYSQL_PASSWORD=$mysql_pdb
-MYSQL_DATABASE=nextcloud
-MYSQL_USER=$mysql_user
+    container_name: maria-db
+    restart: unless-stopped
+    image: mariadb
+    environment:
+      MYSQL_ROOT_PASSWORD: $mysql_root
+      MYSQL_DATABASE: ncdb
+      MYSQL_USER: $mysql_user
+      MYSQL_PASSWORD: $mysql_pdb
+    volumes:
+      - /opt/containers/cloud/mariadb:/var/lib/mysql
 EOF
 }
 
