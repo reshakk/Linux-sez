@@ -538,9 +538,9 @@ services:
     ports:
       - $up_http:80
     volumes:
-      - /opt/containers/cloud/nextcloud/apps:/var/www/html/apps
-      - /opt/containers/cloud/nextcloud/config:/var/www/html/config
-      - /opt/containers/cloud/nextcloud/data:/var/www/html/data
+      - /opt/containerd/cloud/nextcloud/apps:/var/www/html/apps
+      - /opt/containerd/cloud/nextcloud/config:/var/www/html/config
+      - /opt/containerd/cloud/nextcloud/data:/var/www/html/data
     depends_on:
       - db
 
@@ -554,7 +554,7 @@ services:
       MYSQL_USER: $mysql_user
       MYSQL_PASSWORD: $mysql_pdb
     volumes:
-      - /opt/containers/cloud/mariadb:/var/lib/mysql
+      - /opt/containerd/cloud/mariadb:/var/lib/mysql
 EOF
 }
 
