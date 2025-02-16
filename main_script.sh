@@ -475,8 +475,8 @@ function generate_flatnotes(){ #Add prompts
 	local fpasswd=$(whiptail --passwordbox "Please enter password: "  $HEIGHT $WIDTH  3>&1 1>&2 2>&3)
 	local secret_key=$(whiptail --passwordbox "Please enter secret-key: "  $HEIGHT $WIDTH  3>&1 1>&2 2>&3)
 	local new_port=$(whiptail --inputbox "Please enter port: "  $HEIGHT $WIDTH "8080"  3>&1 1>&2 2>&3)
-	mkdir -p /root/flatnotes
-	cat >"/root/flatnotes/docker-compose.yaml" <<EOF
+	mkdir -p /opt/flatnotes
+	cat >"/opt/flatnotes/docker-compose.yaml" <<EOF
 	version: "3"
 
 	services:
@@ -509,8 +509,8 @@ function generate_nextcloud() {
 	local mysql_pdb=$(whiptail --passwordbox "Enter new password for mysql:" $HEIGHT $WIDTH 3>&1 1>&2 2>&3)
 	local mysql_user=$(whiptail --inputbox "Please enter name for sql-user: "  $HEIGHT $WIDTH "user" 3>&1 1>&2 2>&3)
 	docker network create $nw_dock
-	mkdir -p /root/nextcloud
-	cat >"/root/nextcloud/docker-compose.yaml" <<EOF
+	mkdir -p /opt/nextcloud
+	cat >"/opt/nextcloud/docker-compose.yaml" <<EOF
 version: '3'
 services:
   proxy:
@@ -574,7 +574,7 @@ networks:
   $nw_dock:
 EOF
 
-cat > "/root/nextcloud/.env" << EOF
+cat > "/opt/nextcloud/.env" << EOF
 MYSQL_ROOT_PASSWORD=$mysql_proot
 MYSQL_PASSWORD=$mysql_pdb
 MYSQL_DATABASE=nextcloud
