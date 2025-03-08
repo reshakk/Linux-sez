@@ -18,7 +18,7 @@ tar xfj /opt/teamspeak/teamspeak-server.tar.bz2 --strip-components 1 -C /opt/tea
 
 touch /opt/teamspeak/.ts3server_license_accepted
 
-cat >”/etc/systemd/system/teamspeak.service” << EOF
+cat >"/etc/systemd/system/teamspeak.service" << EOF
 [Unit]
 Description=Teamspeak Service
 Wants=network.target
