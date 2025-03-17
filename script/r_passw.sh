@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Need xclip to copied pasword to the clipboard
+# First argument is the length of the password
 
 if [ $1 ]; then
 	length=$1
