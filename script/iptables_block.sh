@@ -4,21 +4,20 @@
 
 #!/bin/bash
 
-# Удаляем список, если он уже есть
+# Delete list if it already exists
 ipset -X whitelist
-# Создаем новый список
+# Create a new list
 ipset -N whitelist nethash
 
-# Скачиваем файлы тех стран, что нас интересуют и сразу объединяем в единый список
+# Download the files of those countries that we are interested in and combine them into a single list at once
 wget -O netwhite http://www.ipdeny.com/ipblocks/data/countries/{ru,ua,kz,by,uz,md,kg,de,am,az,ge,ee,tj,lv}.zone
 
-echo -n "Загружаем белый список в IPSET..."
-# Читаем список сетей и построчно добавляем в ipset
+echo -n "Export file in IPSET..."
+# Read the list of networks and add to ipset line by line
 list=$(cat netwhite)
 for ipnet in $list
  do
  ipset -A whitelist $ipnet
  done
-echo "Завершено"
-# Выгружаем созданный список в файл для проверки состава
+# Export list in file
 ipset -L whitelist > w-export
