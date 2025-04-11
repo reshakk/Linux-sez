@@ -1,6 +1,7 @@
 # Server-auto
 
 A GUI script that serves for minimal user management, swap management, knockd service management, minimal interaction with sshd config and docker.
+And also more scripts to simplify life.
 
 ## Main script for install:
 ``` bash
