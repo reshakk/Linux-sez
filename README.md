@@ -24,7 +24,12 @@ bash <(curl -sL https://raw.githubusercontent.com/reshakk/Ubuntu-gez/master/main
 - `start_swap.sh` - enable swap in fstab;
 - `stop_swap.sh` - disable swap;
 - `r_passw` - random password (first argument - length of password)
+-
 
 ```
 bash <(curl -sL https://raw.githubusercontent.com/reshakk/Ubuntu-gez/master/script/add_name_script.sh)
 ```
+
+### Other cool scripts
+- https://github.com/klazarsk/storagetoolkit/blob/main/topdiskconsumer - This script reports on the top disk consumers to help identify where cleanup is required.
+- https://github.com/vernu/vps-audit/blob/main/vps-audit.sh -  lightweight, dependency-free bash script for security, performance auditing and infrastructure monitoring of Linux servers.
