@@ -1,5 +1,5 @@
-# https://www.ipdeny.com/ipblocks - списки ip-адресов стран
-# https://www.ip2location.com/free/visitor-blocker - конфиг для конкретного сервиса
+# https://www.ipdeny.com/ipblocks - list ip-addres of country
+# https://www.ip2location.com/free/visitor-blocker - configurations for specific services
 
 
 #!/bin/bash
