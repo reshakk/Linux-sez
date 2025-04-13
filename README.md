@@ -23,8 +23,15 @@ bash <(curl -sL https://raw.githubusercontent.com/reshakk/Ubuntu-gez/master/main
 - `swap.sh` - 2 GB swap;
 - `start_swap.sh` - enable swap in fstab;
 - `stop_swap.sh` - disable swap;
-- `r_passw` - random password (first argument - length of password)
--
+- `r_passw.sh` - random password (first argument - length of password);
+- `check_fs.sh` - find a filesystems with UUID or label; (first argument - UUID\label)
+- `check_mnt.sh` - check if filesystem mounted; (first argument - filesystem)
+- `dir_size.sh` - check size of direction; 
+- `iptables_block.sh` - block ip-address of specific countries;
+- `ps_mem.sh` - RAM usage by processes;
+- `swap_proc.sh` - use of swap by processes;
+- `trash.sh` - like recycle bin;
+- `wget.sh` - server load (first argument - number of cycles).
 
 ```
 bash <(curl -sL https://raw.githubusercontent.com/reshakk/Ubuntu-gez/master/script/add_name_script.sh)
