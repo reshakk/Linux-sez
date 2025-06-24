@@ -2,7 +2,7 @@
 
 read -p "Enter port: " port
 
-systemctl stop knockd
+systemctl disable knockd
 
 iptables -D INPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
 iptables -D INPUT -p tcp --dport "$port" -j REJECT
