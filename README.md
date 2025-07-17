@@ -1,40 +1,25 @@
-# Server-auto
+# My list of scripts for different purpouse
 
-A GUI script that serves for minimal user management, swap management, knockd service management, minimal interaction with sshd config and docker.
-And also more scripts to simplify life.
-
-## Main script for install:
-``` bash
-bash <(curl -sL https://raw.githubusercontent.com/reshakk/Ubuntu-gez/master/main_script.sh)
+```
+curl -o install.sh -L 
 ```
 
-![image](https://github.com/reshakk/Server-auto/blob/main/GUI.png)
 
-## Roadmap:
-- [ ] Add fail2ban
-- [ ] Add marzban
-
-
-### Other scripts
-**You can also run the scripts separately:**
+**List of scripts:**
 - `docker_in.sh` - installer docker;
-- `start_knock.sh` - downloads knockd, creates configuration files, and configures rules for iptables;
-- `stop_knock.sh` - stop knockd-service;
-- `swap.sh` - 2 GB swap;
-- `start_swap.sh` - enable swap in fstab;
-- `stop_swap.sh` - disable swap;
+- `mg_knock` - manager for port-knocking;
+- `mg_swap` - manager for swap;
 - `r_passw.sh` - random password (first argument - length of password);
-- `check_fs.sh` - find a filesystems with UUID or label; (first argument - UUID\label)
-- `check_mnt.sh` - check if filesystem mounted; (first argument - filesystem)
-- `dir_size.sh` - check size of direction; 
 - `iptables_block.sh` - block ip-address of specific countries;
 - `ps_mem.sh` - RAM usage by processes;
+- `SSHNecro.sh` - use tmux for ssh connection;
 - `swap_proc.sh` - use of swap by processes;
-- `trash.sh` - like recycle bin;
+- `mon.sh` - for monitoring RAM, CPU and disk usage;
+- `setup-vm.sh` - my setup for VPS;
 - `wget.sh` - server load (first argument - number of cycles).
 
 ```
-bash <(curl -sL https://raw.githubusercontent.com/reshakk/Ubuntu-gez/master/script/add_name_script.sh)
+bash <(curl -sL )
 ```
 
 ### Other cool scripts
