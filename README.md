@@ -1,7 +1,7 @@
 # My list of scripts for different purpouse
 
 ```
-curl -o install.sh -L https://raw.githubusercontent.com/reshakk/Linux-sez/refs/heads/main/SSHNecro.sh
+curl -o install.sh -L https://raw.githubusercontent.com/reshakk/Linux-sez/refs/heads/main/name_script.sh
 ```
 
 
@@ -19,7 +19,7 @@ curl -o install.sh -L https://raw.githubusercontent.com/reshakk/Linux-sez/refs/h
 - `wget.sh` - server load (first argument - number of cycles).
 
 ```
-bash <(curl -sL https://raw.githubusercontent.com/reshakk/Linux-sez/refs/heads/main/SSHNecro.sh)
+bash <(curl -sL https://raw.githubusercontent.com/reshakk/Linux-sez/refs/heads/main/name_script.sh)
 ```
 
 ### Other cool scripts
