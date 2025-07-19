@@ -19,13 +19,13 @@ if [ "$EUID" -ne 0 ]; then
 fi
 
 valid_size() {
-	if ! [[ $SWAP_SIZE ~= ^[0-9]+[MG]$ ]];then
+	if ! [[ $SWAP_SIZE =~ ^[0-9]+[MG]$ ]]; then
 		echo "ERROR: Invalid size (size should look like that: 512M, 2G)"
 		exit 1
 	fi
 }
 
-function create_swap() {
+create_swap() {
 
 	valid_size
 	
@@ -58,7 +58,7 @@ function create_swap() {
 	echo "All changes have been accepted."
 }
 
-function enable_swap() {
+enable_swap() {
 
 	sed -i 's,^#\(/.*[[:space:]]none[[:space:]]*swap[[:space:]]\),\1,' "$FSTAB_FILE"
 
@@ -68,16 +68,16 @@ function enable_swap() {
 	echo "Swap is enable"
 }
 
-function disable_swap(){
+disable_swap(){
 
 	swapoff -a
 
-	sed -i '/#.*\/swap.img/s/^#//' "$FSTAB_FILE"
+	sed -i '/swapfile/ s/^#*/#/' -i /etc/fstab
 
 	echo "Swap disabled"
 }
 
-function show_help() {
+show_help() {
 	echo "Swap manager"
 	echo ""
 	echo "$0 --help"
