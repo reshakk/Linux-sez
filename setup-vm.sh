@@ -56,24 +56,28 @@ iptables_add() {
 	fi
 }
 
-while true; do
-	read -r -n 1 -p "Current ssh session may drop! You can use 'screen' so that you don't lose current session. Are you ready? (y|n) " yn
-	case $yn in
-		[Yy]*)
-			main_func
-			;;
-		[Nn]*)
-			exit 1
-	esac
-done
 
 main_func() {
 
-	#echo -e "\n====================\nSetting timezone\n===================="
-	#timedatectl set-timezone Europe/Moscow
-	#systemctl restart systemd-timesyncd.service
-	#timedatectl
-	#echo -e "\nDONE\n"
+	echo -e "\n====================\nSetting timezone\n===================="
+	while true; do
+		read -r -n 1 -p "Continue or Skip? (c|s)" cs
+		case $cs in
+			[Cc]*)
+				timedatectl set-timezone Europe/Moscow
+				systemctl restart systemd-timesyncd.service
+				timedatectl
+				echo -e "\nDONE\n"
+				break
+				;;
+			[Ss]*)
+				echo -e "\n"
+				break
+				;;
+			*) echo -e "\nPlease answer C or S!\n" ;;
+		esac
+	done
+
 
 	if [ ! -f /etc/ssh/sshd_config ]; then
 	  echo -e "\n====================\nFile /etc/ssh/sshd_config not found!\n====================\n"
@@ -85,19 +89,29 @@ main_func() {
 	  exit 1
 	fi
 
-	echo -e "\n====================\nNew user config\n===================="
+	echo -e "\n====================\nNew user\n===================="
 
 	while true; do
 	  read -r -n 1 -p "Continue or Skip? (c|s) " cs
 	  case $cs in
-	  [Cc]*)
-	    username_request
+		  [Cc]*)
+		    username_request
 
-	    read -r -p "new password: " -s password
+		    read -r -p "new password: " -s password
 
-	    useradd -p "$(openssl passwd -1 "$password")" "$username" -s /bin/bash -m 
-	    cp -r /root/.ssh/ /home/"$username"/ && chown -R "$username":"$username" /home/"$username"/.ssh/
-	    echo -e "\n\nDONE\n"
+		    useradd -p "$(openssl passwd -1 "$password")" "$username" -s /bin/bash -m 
+		    cp -r /root/.ssh/ /home/"$username"/ && chown -R "$username":"$username" /home/"$username"/.ssh/
+		    echo -e "\n\nDONE\n"
+		    break
+		    ;;
+    		[Ss]*)
+		    new_port=22
+		    echo -e "\n"
+		    break
+		    ;;
+	    	*) echo -e "\nPlease answer C or S!\n" ;;
+	  esac
+	done
 
 
 	echo -e "\n====================\nEdit sshd_config file\n===================="
@@ -105,7 +119,7 @@ main_func() {
 	while true; do
 	  read -r -n 1 -p "Continue or Skip? (c|s) " cs
 	  case $cs in
-	  [Cc]*) # Порт
+	  [Cc]*) 
 	    read -r -p "New ssh-port: " -s new_port
 	    sed -i 's/#\?\(Port\s*\).*$/\1 $new_port/' /etc/ssh/sshd_config
 	    sed -i 's/#\?\(PermitRootLogin\s*\).*$/\1 no/' /etc/ssh/sshd_config
@@ -166,18 +180,15 @@ main_func() {
 	fi
 EOF
 
-	# настроим iptables
 	echo -e "\n====================\nIptables config\n===================="
 	while true; do
-	  read -r -n 1 -p "Current ssh session may drop! To continue you have to relogin to this host via $new_port ssh-port and run this script again. Are you ready? (y|n) " yn
-	  case $yn in
-	  [Yy]*) #---DNS---
+	  read -r -n 1 -p "Current ssh session may drop! To continue you have to relogin to this host via $new_port ssh-port and run this script again. Continue or skip? (c|s) " cs
+	  case $cs in
+	  [Cs]*) #---DNS---
 	    iptables_add OUTPUT -p tcp --dport 53 -j ACCEPT -m comment --comment dns
 	    iptables_add OUTPUT -p udp --dport 53 -j ACCEPT -m comment --comment dns
 	    #---NTP---
 	    iptables_add OUTPUT -p udp --dport 123 -j ACCEPT -m comment --comment ntp
-	    #---REPO---
-	    iptables_add OUTPUT -p tcp --dport 1111 -j ACCEPT -m comment --comment repo.justnikobird.ru
 	    #---ICMP---
 	    iptables_add OUTPUT -p icmp -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT
 	    iptables_add INPUT -p icmp -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT
@@ -204,7 +215,7 @@ EOF
 	    echo -e "DONE\n"
 	    break
 	    ;;
-	  [Nn]*)
+	  [Ss]*)
 	    echo -e "\n"
 	    exit
 	    ;;
@@ -212,6 +223,8 @@ EOF
 	  esac
 	done
 }
+
+main_func
 
 echo -e "\nOK\n"
 exit 0
