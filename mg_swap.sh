@@ -72,7 +72,7 @@ disable_swap(){
 
 	swapoff -a
 
-	sed -i '/swapfile/ s/^#*/#/' -i /etc/fstab
+	sed -i '/swapfile/ s/^#*/#/' -i "$FSTAB_FILE"
 
 	echo "Swap disabled"
 }
